@@ -53,7 +53,7 @@ end
 
 # Read zip files in the data directory and do a lookup
 # read files in the data dir
-zipfiles = %x[ls #{opts[:datadir]} | grep '.*\.zip'].split("\n")
+zipfiles = %x[ls #{opts[:datadir]} | grep '.*\.zip' | grep 'edrm'].split("\n")
 
 counter = 0
 
@@ -85,7 +85,8 @@ zipfiles.each do |z|
       end
     end
   end
-  
+rescue
+  p "Exception somewhere"
 end
 
 
