@@ -58,6 +58,7 @@ zipfiles = %x[ls #{opts[:datadir]} | grep '.*\.zip'].split("\n")
 counter = 0
 
 zipfiles.each do |z|
+  p "Looking into zipfile::::: " + z
   files = %x[unzip -l #{opts[:datadir]}/#{z} | awk '{print $NF}' | grep '.*\.txt' | grep -v 'native' | sort].split("\n")
   files.each do |f|
     # eg:: f = text_000/3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA.1.txt
