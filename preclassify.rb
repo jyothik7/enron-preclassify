@@ -58,35 +58,37 @@ zipfiles = %x[ls #{opts[:datadir]} | grep '.*\.zip' | grep 'edrm'].split("\n")
 counter = 0
 
 zipfiles.each do |z|
-  p "Looking into zipfile::::: " + z
-  files = %x[unzip -l #{opts[:datadir]}/#{z} | awk '{print $NF}' | grep '.*\.txt' | grep -v 'native' | sort].split("\n")
-  files.each do |f|
-    # eg:: f = text_000/3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA.1.txt
-    f_part = f.split("/")[1]
-    # f_part gives 3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA.1.txt and now we need just 3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA
-    part = f_part.split(".")
-    pre_filename = part[0] + "." + part[1] + "." + part[2]
+  begin
+    p "Looking into zipfile::::: " + z
+    files = %x[unzip -l #{opts[:datadir]}/#{z} | awk '{print $NF}' | grep '.*\.txt' | grep -v 'native' | sort].split("\n")
+    files.each do |f|
+      # eg:: f = text_000/3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA.1.txt
+      f_part = f.split("/")[1]
+      # f_part gives 3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA.1.txt and now we need just 3.540219.K3DZSZHESF0ZHXVPSBL310YDF0BXAO3OA
+      part = f_part.split(".")
+      pre_filename = part[0] + "." + part[1] + "." + part[2]
     
-    # If there is a match with the lookup
-    if lookup.has_key?(pre_filename)
-      fullzipfilepath = opts[:datadir]+ "/" + z 
-      # p pre_filename + " CLASS LABEL " + lookup[pre_filename] + "    " + fullzipfilepath + " ::: " + f
-      counter = counter + 1
-      case lookup[pre_filename]
-      when "1" # relevant
-        %x[unzip -p #{fullzipfilepath} #{f} > #{OUT_rel}/#{f_part}]
-        p "(#{counter}) Writing file #{OUT_rel}/#{f_part}"
-      when "0" # not relevant
-        %x[unzip -p #{fullzipfilepath} #{f} > #{OUT_notrel}/#{f_part}]
-        p "(#{counter}) Writing file #{OUT_notrel}/#{f_part}"
-      when "-1" # not judged
-        %x[unzip -p #{fullzipfilepath} #{f} > #{OUT_notjudge}/#{f_part}]
-        p "(#{counter}) Writing file #{OUT_notjudge}/#{f_part}"
+      # If there is a match with the lookup
+      if lookup.has_key?(pre_filename)
+        fullzipfilepath = opts[:datadir]+ "/" + z 
+        # p pre_filename + " CLASS LABEL " + lookup[pre_filename] + "    " + fullzipfilepath + " ::: " + f
+        counter = counter + 1
+        case lookup[pre_filename]
+        when "1" # relevant
+          %x[unzip -p #{fullzipfilepath} #{f} > #{OUT_rel}/#{f_part}]
+          p "(#{counter}) Writing file #{OUT_rel}/#{f_part}"
+        when "0" # not relevant
+          %x[unzip -p #{fullzipfilepath} #{f} > #{OUT_notrel}/#{f_part}]
+          p "(#{counter}) Writing file #{OUT_notrel}/#{f_part}"
+        when "-1" # not judged
+          %x[unzip -p #{fullzipfilepath} #{f} > #{OUT_notjudge}/#{f_part}]
+          p "(#{counter}) Writing file #{OUT_notjudge}/#{f_part}"
+        end
       end
     end
+  rescue
+    p "Exception somewhere"
   end
-rescue
-  p "Exception somewhere"
 end
 
 
